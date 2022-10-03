@@ -1,0 +1,45 @@
+{
+    "name": "ChinchirorinInput",
+    "maps": [
+        {
+            "name": "Standard",
+            "id": "0b95889c-3416-40de-bbcb-5c331011cc26",
+            "actions": [
+                {
+                    "name": "Throw",
+                    "type": "Button",
+                    "id": "51880ad5-777e-449d-b97b-c8799103a1b4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1950b4d8-7dc5-4bab-812a-3d0da6a58995",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2dd4bbc1-bd34-4007-a20a-5d1ff82a2532",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
