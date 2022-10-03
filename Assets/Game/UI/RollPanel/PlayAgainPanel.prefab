@@ -153,7 +153,7 @@ MonoBehaviour:
   m_MinWidth: 0
   m_MinHeight: 0
   m_PreferredWidth: 400
-  m_PreferredHeight: 100
+  m_PreferredHeight: 80
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -307,8 +307,8 @@ MonoBehaviour:
   m_Padding:
     m_Left: 30
     m_Right: 30
-    m_Top: 60
-    m_Bottom: 30
+    m_Top: 40
+    m_Bottom: 20
   m_ChildAlignment: 0
   m_Spacing: 0
   m_ChildForceExpandWidth: 0
