@@ -9,15 +9,20 @@ public class ThrowHand : MonoBehaviour
     // Tunables
     [Header("Properties")]
     [SerializeField] int diceCount = 3;
+    [SerializeField] int throwCount = 3;
     [SerializeField] ThrowPath throwPath = null;
     [SerializeField] float speed = 0.5f;
     [SerializeField] float arcHeight = 0.1f;
+    [Header("AI")]
+    [SerializeField] float aiThrowDelayMin = 0.5f;
+    [SerializeField] float aiThrowDelayMax = 2.5f;
     [Header("Hookups")]
     [SerializeField] DiceContainer diceContainer = null;
     [SerializeField] SoundEffects grunter = null;
     [SerializeField] SoundEffects chucker = null;
 
     // State
+    int throwCountTracker = 0;
     bool isThrowComplete = false;
     float stepScale = 0f;
     float progress = 0f;
@@ -29,8 +34,8 @@ public class ThrowHand : MonoBehaviour
     private void Awake()
     {
         chinchirorinInput = new ChinchirorinInput();
-        chinchirorinInput.Standard.Throw.performed += context => InitializeThrow();
-        isThrowComplete = false;
+        chinchirorinInput.Standard.Throw.performed += context => PlayerThrow();
+        isThrowComplete = true;
     }
 
     private void OnEnable()
@@ -65,7 +70,38 @@ public class ThrowHand : MonoBehaviour
         }
     }
 
+    // Public Methods
+    public bool AnyThrowsRemaining() => throwCountTracker < throwCount * 2; // *2 for 1st: player throws, 2nd: opponent throws
+
+    public void ResetThrow()
+    {
+        isThrowComplete = false;
+        if (ShouldAIThrow()) { StartCoroutine(QueueAIThrow()); }
+    }
+
+    public void ResetGame()
+    {
+        throwCountTracker = 0;
+    }
+
     // Private Methods
+    private void PlayerThrow()
+    {
+        if (ShouldAIThrow()) { return; }
+        InitializeThrow(true);
+    }
+
+    private void InitializeThrow(bool isPlayer)
+    {
+        if (diceContainer == null) { return; }
+        if (isThrowComplete) { return; }
+
+        diceContainer.SetPlayer(isPlayer);
+        isThrowComplete = true;
+        grunter.PlayRandomAudioClip();
+        grunter.audioComplete += FinishThrow;
+    }
+
     private void MoveHandAlongParabola()
     {
         progress = Mathf.Min(progress + Time.deltaTime * stepScale, 1.0f);
@@ -86,16 +122,6 @@ public class ThrowHand : MonoBehaviour
         transform.position = nextPosition;
     }
 
-    private void InitializeThrow()
-    {
-        if (diceContainer == null) { return; }
-        if (isThrowComplete) { return; }
-
-        isThrowComplete = true;
-        grunter.PlayRandomAudioClip();
-        grunter.audioComplete += FinishThrow;
-    }
-
     private void FinishThrow()
     {
         if (diceContainer == null) { return; }
@@ -103,11 +129,19 @@ public class ThrowHand : MonoBehaviour
         chucker.PlayRandomAudioClip();
         diceContainer.SpawnDice(transform, diceCount);
         grunter.audioComplete -= FinishThrow;
+
+        throwCountTracker++;
     }
 
-    // Public Methods
-    public void ResetThrow()
+    private bool ShouldAIThrow()
     {
-        isThrowComplete = false;
+        return throwCountTracker >= throwCount && throwCountTracker < throwCount * 2;
+    }
+
+    private IEnumerator QueueAIThrow()
+    {
+        float throwDelay = UnityEngine.Random.Range(aiThrowDelayMin, aiThrowDelayMax);
+        yield return new WaitForSeconds(throwDelay);
+        InitializeThrow(false);
     }
 }

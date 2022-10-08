@@ -9,6 +9,7 @@ public class DiceContainer : MonoBehaviour
     [SerializeField] Dice dicePrefab = null;
 
     // State
+    bool? isPlayer = null;
     int maxDiceToSettle = 0;
     int settledDiceCount = 0;
     int[] settledDice;
@@ -17,7 +18,10 @@ public class DiceContainer : MonoBehaviour
     public event Action<int[]> diceScoreSettled;
 
     // Public Methods
-    public void SpawnDice(Transform target, int quantity = 3)
+    public void SetPlayer(bool isPlayer) { this.isPlayer = isPlayer; }
+    public bool? IsPlayer() => isPlayer;
+
+    public void SpawnDice(Transform target, int quantity = 3, bool isPlayer = true)
     {
         maxDiceToSettle = quantity;
         settledDice = new int[quantity];
@@ -32,6 +36,7 @@ public class DiceContainer : MonoBehaviour
 
     public void ResetDice()
     {
+        isPlayer = null;
         foreach (Transform child in transform)
         {
             Destroy(child.gameObject);

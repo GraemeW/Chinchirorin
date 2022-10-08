@@ -19,24 +19,33 @@ public class ScoreKeep : MonoBehaviour
 
     // Tunables
     [Header("Properties")]
-    [SerializeField] int initialCash = 1000;
+    [SerializeField] int defaultWager = 10;
     [Header("Hookups")]
     [SerializeField] DiceContainer diceContainer = null;
     [SerializeField] ThrowHand throwHand = null;
 
     // State
+    string playerName = null;
+    string opponentName = "";
+    int wager = 0;
+
     int[] currentRolls;
     ScoreType currentScoreType = ScoreType.Whiff;
-    int currentScore = 0;
-    int currentCash = 0;
+    int playerScore = 0;
+    int opponentScore = 0;
+
+    bool isGameComplete = false;
 
     // Events
-    public event Action rollComplete;
+    public event Action<bool> rollComplete;
+    public event Action throwReset;
+    public event Action gameComplete;
+    public event Action gameReset;
 
     // Unity Methods
     private void Awake()
     {
-        currentCash = initialCash;
+        wager = defaultWager;
     }
 
     private void OnEnable()
@@ -52,12 +61,14 @@ public class ScoreKeep : MonoBehaviour
     }
 
     // Public Methods
+    public string GetPlayerName() => playerName;
+    public string GetOpponentName() => opponentName;
+    public int GetWager() => wager;
     public ScoreType GetScoreType() => currentScoreType;
-    public int GetScore() => currentScore;
-
+    public int GetScore(bool isPlayer) => isPlayer ? playerScore : opponentScore;
     public int[] GetRolls() => currentRolls;
-    public int GetCash() => currentCash;
-    public void ResetGame()
+
+    public void ResetThrow()
     {
         if (diceContainer == null) { return; }
         diceContainer.ResetDice();
@@ -66,7 +77,23 @@ public class ScoreKeep : MonoBehaviour
 
         currentRolls = new int[0];
         currentScoreType = ScoreType.Whiff;
-        currentScore = 0;
+
+        throwReset?.Invoke();
+    }
+    public void ResetGame(string playerName = null, int wager = 0)
+    {
+        isGameComplete = false;
+
+        this.playerName = playerName;
+        this.wager = wager;
+        opponentName = NameGenerator.GetRandomName();
+        playerScore = 0;
+        opponentScore = 0;
+        
+        throwHand.ResetGame();
+        ResetThrow();
+
+        gameReset?.Invoke();
     }
 
     // Private Methods
@@ -75,11 +102,16 @@ public class ScoreKeep : MonoBehaviour
         currentRolls = (int[])rolls.Clone();
         Array.Sort(currentRolls);
 
-        ProcessStandardScore();
-        rollComplete?.Invoke();
+        bool? isPlayer = diceContainer.IsPlayer();
+        if (isPlayer.HasValue)
+        {
+            ProcessStandardScore(isPlayer.Value);
+            rollComplete?.Invoke(isPlayer.Value);
+            if (isGameComplete) { gameComplete?.Invoke(); }
+        }
     }
 
-    private void ProcessStandardScore()
+    private void ProcessStandardScore(bool isPlayer)
     {
         if (currentRolls.Length != 3) { return; }
 
@@ -93,43 +125,60 @@ public class ScoreKeep : MonoBehaviour
             if (firstEntry >= 4)
             {
                 currentScoreType = ScoreType.StormTriple;
-                currentScore = 1;
+                SetScore(isPlayer, 1);
             }
             else
             {
                 currentScoreType = ScoreType.StormTriple;
-                currentScore = -1;
+                SetScore(isPlayer, -1);
             }
+            isGameComplete = true;
         }
         else if (firstEntry == 4 && secondEntry == 5 && thirdEntry == 6)
         {
             currentScoreType = ScoreType.StormDouble;
-            currentScore = 1;
+            SetScore(isPlayer, 1);
+            isGameComplete = true;
         }
         else if (firstEntry == 1 && secondEntry == 2 && thirdEntry == 3)
         {
             currentScoreType = ScoreType.StormDouble;
-            currentScore = -1;
+            SetScore(isPlayer, -1);
+            isGameComplete = true;
         }
         else if (firstEntry == secondEntry)
         {
             currentScoreType = ScoreType.Standard;
-            currentScore = thirdEntry;
+            SetScore(isPlayer, thirdEntry);
         }
         else if (firstEntry == thirdEntry)
         {
             currentScoreType = ScoreType.Standard;
-            currentScore = secondEntry;
+            SetScore(isPlayer, secondEntry);
         }
         else if (secondEntry == thirdEntry)
         {
             currentScoreType = ScoreType.Standard;
-            currentScore = firstEntry;
+            SetScore(isPlayer, firstEntry);
         }
         else
         {
             currentScoreType = ScoreType.Whiff;
-            currentScore = 0;
+            SetScore(isPlayer, 0);
+        }
+
+        if (!throwHand.AnyThrowsRemaining()) { isGameComplete = true; }
+    }
+
+    private void SetScore(bool isPlayer, int score)
+    {
+        if (isPlayer)
+        {
+            playerScore = Mathf.Max(playerScore, score);
+        }
+        else
+        {
+            opponentScore = Mathf.Max(opponentScore, score);
         }
     }
 }
