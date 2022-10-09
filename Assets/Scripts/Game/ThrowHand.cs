@@ -9,7 +9,6 @@ public class ThrowHand : MonoBehaviour
     // Tunables
     [Header("Properties")]
     [SerializeField] int diceCount = 3;
-    [SerializeField] int throwCount = 3;
     [SerializeField] ThrowPath throwPath = null;
     [SerializeField] float speed = 0.5f;
     [SerializeField] float arcHeight = 0.1f;
@@ -18,17 +17,21 @@ public class ThrowHand : MonoBehaviour
     [SerializeField] float aiThrowDelayMax = 2.5f;
     [Header("Hookups")]
     [SerializeField] DiceContainer diceContainer = null;
-    [SerializeField] SoundEffects grunter = null;
+    [SerializeField] SoundEffects playerGrunter = null;
+    [SerializeField] SoundEffects opponentGrunter = null;
     [SerializeField] SoundEffects chucker = null;
 
     // State
-    int throwCountTracker = 0;
     bool isThrowComplete = false;
+    bool isAIThrowing = false;
     float stepScale = 0f;
     float progress = 0f;
 
     // Input
     ChinchirorinInput chinchirorinInput = null;
+
+    // Events
+    public event Action throwComplete;
 
     // Unity Methods
     private void Awake()
@@ -71,23 +74,21 @@ public class ThrowHand : MonoBehaviour
     }
 
     // Public Methods
-    public bool AnyThrowsRemaining() => throwCountTracker < throwCount * 2; // *2 for 1st: player throws, 2nd: opponent throws
-
     public void ResetThrow()
     {
         isThrowComplete = false;
-        if (ShouldAIThrow()) { StartCoroutine(QueueAIThrow()); }
+        if (isAIThrowing) { StartCoroutine(QueueAIThrow()); }
     }
 
-    public void ResetGame()
+    public void SetAIThrowing(bool enable)
     {
-        throwCountTracker = 0;
+        isAIThrowing = enable;
     }
 
     // Private Methods
     private void PlayerThrow()
     {
-        if (ShouldAIThrow()) { return; }
+        if (isAIThrowing) { return; }
         InitializeThrow(true);
     }
 
@@ -98,8 +99,18 @@ public class ThrowHand : MonoBehaviour
 
         diceContainer.SetPlayer(isPlayer);
         isThrowComplete = true;
-        grunter.PlayRandomAudioClip();
-        grunter.audioComplete += FinishThrow;
+        throwComplete?.Invoke();
+
+        if (!isAIThrowing)
+        {
+            playerGrunter.PlayRandomAudioClip();
+            playerGrunter.audioComplete += FinishThrow;
+        }
+        else
+        {
+            opponentGrunter.PlayRandomAudioClip();
+            opponentGrunter.audioComplete += FinishThrow;
+        }
     }
 
     private void MoveHandAlongParabola()
@@ -128,14 +139,9 @@ public class ThrowHand : MonoBehaviour
 
         chucker.PlayRandomAudioClip();
         diceContainer.SpawnDice(transform, diceCount);
-        grunter.audioComplete -= FinishThrow;
 
-        throwCountTracker++;
-    }
-
-    private bool ShouldAIThrow()
-    {
-        return throwCountTracker >= throwCount && throwCountTracker < throwCount * 2;
+        if (!isAIThrowing) { playerGrunter.audioComplete -= FinishThrow; }
+        else { opponentGrunter.audioComplete -= FinishThrow; }
     }
 
     private IEnumerator QueueAIThrow()

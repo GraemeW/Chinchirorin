@@ -6,7 +6,6 @@ using UnityEngine;
 public class ScoreUI : MonoBehaviour
 {
     [Header("Tunables")]
-    [SerializeField] string defaultPlayerName = "Player";
     [SerializeField] string messageWhiff = "Whiff!";
     [SerializeField] string messageStandard = "Score:";
     [SerializeField] string messageStormDoublePositive = "Storm!  Double!!";
@@ -18,11 +17,10 @@ public class ScoreUI : MonoBehaviour
     [SerializeField] GameObject rollPanel = null;
     [SerializeField] ScorePanelUI playerScorePanel = null;
     [SerializeField] ScorePanelUI opponentScorePanel = null;
-    [SerializeField] GameObject rollAgainPanel = null;
-    [SerializeField] GameObject playAgainPanel = null;
     [SerializeField] TMP_Text rollMessage = null;
     [SerializeField] Transform diceEntryPanel = null;
     [SerializeField] DiceEntryUI diceEntryPrefab = null;
+    [SerializeField] MatchPanelUI matchCompletePanel = null;
 
     // State
 
@@ -39,21 +37,22 @@ public class ScoreUI : MonoBehaviour
     {
         scoreKeep.rollComplete += HandleRollComplete;
         scoreKeep.throwReset += HandleThrowReset;
-        scoreKeep.gameComplete += HandleGameComplete;
-        scoreKeep.gameReset += HandleGameReset;
+        scoreKeep.matchComplete += HandleMatchComplete;
+        scoreKeep.matchReset += HandleMatchReset;
     }
 
     private void OnDisable()
     {
         scoreKeep.rollComplete -= HandleRollComplete;
         scoreKeep.throwReset -= HandleThrowReset;
-        scoreKeep.gameComplete -= HandleGameComplete;
-        scoreKeep.gameReset -= HandleGameReset;
+        scoreKeep.matchComplete -= HandleMatchComplete;
+        scoreKeep.matchReset -= HandleMatchReset;
     }
 
     private void Start()
     {
-        rollPanel.gameObject.SetActive(false);
+        rollPanel.SetActive(false);
+        matchCompletePanel.gameObject.SetActive(false);
     }
 
     // Public Methods
@@ -63,28 +62,34 @@ public class ScoreUI : MonoBehaviour
         scoreKeep.ResetThrow();
     }
 
-    public void TriggerGameReset()  // Called via Unity Events --> calls back to HandleReset
+    public void TriggerMatchReset()  // Called via Unity Events --> calls back to HandleReset
     {
         if (scoreKeep == null) { return; }
-        scoreKeep.ResetGame();
+        scoreKeep.ResetMatch();
     }
 
     // Private Methods
     private void HandleRollComplete(bool isPlayer)
     {
-        if (rollPanel == null) { return; }
         rollPanel.gameObject.SetActive(true);
 
-        playAgainPanel.SetActive(false);
-        rollAgainPanel.SetActive(true);
-
-        UpdateUI(isPlayer);
+        ScoreType scoreType = scoreKeep.GetScoreType();
+        int score = scoreKeep.GetScore(isPlayer);
+        UpdateRollMessage(isPlayer, scoreType, score);
+        ShowDiceRolls(scoreType, score);
+        UpdateScores(isPlayer, score);
     }
 
-    private void HandleGameComplete()
+    private void HandleMatchComplete(MatchData matchResolutionData)
     {
-        rollAgainPanel.SetActive(false);
-        playAgainPanel.SetActive(true);
+        if (scoreKeep == null) { return; }
+
+        // Safety against roll panel showing on match end -- suppress for game complete
+        rollPanel.gameObject.SetActive(false);
+
+        // Then set up the main match panel
+        matchCompletePanel.gameObject.SetActive(true);
+        matchCompletePanel.Setup(matchResolutionData, scoreKeep.GetScoreType());
     }
 
     private void HandleThrowReset()
@@ -94,32 +99,29 @@ public class ScoreUI : MonoBehaviour
             Destroy(child.gameObject);
         }
         rollPanel.gameObject.SetActive(false);
+        if (scoreKeep.ShouldAIThrow())
+        {
+
+        }
     }
 
-    private void HandleGameReset()
+    private void HandleMatchReset()
     {
-        string playerName = scoreKeep.GetPlayerName() != null ? scoreKeep.GetPlayerName() : defaultPlayerName;
-        playerScorePanel.Setup(playerName, "-");
+        if (scoreKeep == null) { return; }
+
+        playerScorePanel.Setup(scoreKeep.GetPlayerName(), "-");
         opponentScorePanel.Setup(scoreKeep.GetOpponentName(), "-");
-    }
 
-    private void UpdateUI(bool isPlayer)
-    {
-        if (diceEntryPanel == null) { return; }
-
-        ScoreType scoreType = scoreKeep.GetScoreType();
-        int score = scoreKeep.GetScore(isPlayer);
-        UpdateRollMessage(isPlayer, scoreType, score);
-        ShowDiceRolls(scoreType, score);
-        UpdateScores(isPlayer, score);
+        matchCompletePanel.gameObject.SetActive(false);
     }
 
     private void UpdateScores(bool isPlayer, int score)
     {
+        if (scoreKeep == null) { return; }
+
         if (isPlayer)
         {
-            string playerName = scoreKeep.GetPlayerName() != null ? scoreKeep.GetPlayerName() : defaultPlayerName;
-            playerScorePanel.Setup(playerName, score);
+            playerScorePanel.Setup(scoreKeep.GetPlayerName(), score);
         }
         else
         {
@@ -175,6 +177,8 @@ public class ScoreUI : MonoBehaviour
 
     private void ShowAllDiceRolls()
     {
+        if (scoreKeep == null) { return; }
+
         int[] rolls = scoreKeep.GetRolls();
         foreach (int roll in rolls)
         {
