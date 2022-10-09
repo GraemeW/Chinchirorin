@@ -259,7 +259,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 013ee8802bc3c3649951fbb2935a757f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugGenerateTestInitiator: 1
+  postToJavascript: 1
+  debugGenerateTestInitiator: 0
 --- !u!4 &2122952124
 Transform:
   m_ObjectHideFlags: 0

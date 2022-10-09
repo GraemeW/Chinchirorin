@@ -60,7 +60,7 @@ public class ScoreUI : MonoBehaviour
         matchCompletePanel.gameObject.SetActive(false);
         aiThrowOverlay.gameObject.SetActive(false);
 
-        initializationOverlay.gameObject.SetActive(true);
+        initializationOverlay.gameObject.SetActive(false);
     }
 
     // Public Methods

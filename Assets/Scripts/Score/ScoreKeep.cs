@@ -230,6 +230,8 @@ public class ScoreKeep : MonoBehaviour
 
     private MatchResolutionType GetMatchResolutionType()
     {
+        if (!isMatchComplete) { return MatchResolutionType.InProgress; }
+
         if (playerScore == opponentScore) { return MatchResolutionType.Draw; }
         else if (playerScore > opponentScore) { return MatchResolutionType.PlayerWin; }
         else { return MatchResolutionType.PlayerLoss; }

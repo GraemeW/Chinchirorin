@@ -6,10 +6,15 @@ using System.Runtime.InteropServices;
 public class DiscordHandshaker : MonoBehaviour
 {
     // Tunables
+    [SerializeField] bool postToJavascript = true;
     [SerializeField] bool debugGenerateTestInitiator = false;
 
     // Cached References
     ScoreKeep scoreKeep = null;
+
+    // Javascript Imports
+    [DllImport("__Internal")]
+    private static extern void PostRollData(string payload);
 
     // Unity Methods
     private void Awake()
@@ -70,14 +75,22 @@ public class DiscordHandshaker : MonoBehaviour
         MatchData matchData = scoreKeep.GetMatchData();
         string matchString = JsonUtility.ToJson(matchData);
         UnityEngine.Debug.Log("Roll complete, posting:");
-        UnityEngine.Debug.Log(SymmetricEncryptor.EncryptString(matchString));
+        UnityEngine.Debug.Log(matchString);
+
+        string encryptedString = SymmetricEncryptor.EncryptString(matchString);
+        if (postToJavascript) { PostRollData(encryptedString); }
+        UnityEngine.Debug.Log(encryptedString);
     }
 
     private void HandleMatchComplete(MatchData matchData)
     {
         string matchString = JsonUtility.ToJson(matchData);
         UnityEngine.Debug.Log("Match complete, posting:");
-        UnityEngine.Debug.Log(SymmetricEncryptor.EncryptString(matchString));
+        UnityEngine.Debug.Log(matchString);
+
+        string encryptedString = SymmetricEncryptor.EncryptString(matchString);
+        if (postToJavascript) { PostRollData(encryptedString); }
+        UnityEngine.Debug.Log(encryptedString);
     }
 
     private string GenerateTestInitiator()
