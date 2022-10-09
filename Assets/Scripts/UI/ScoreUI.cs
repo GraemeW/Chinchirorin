@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ScoreUI : MonoBehaviour
@@ -12,6 +14,7 @@ public class ScoreUI : MonoBehaviour
     [SerializeField] string messageStormTriplePositive = "Storm!  Triple!!!";
     [SerializeField] string messageStormDoubleNegative = "Storm!  Oops!!";
     [SerializeField] string messageStormTripleNegative = "Storm!  Yikes!!!";
+    [SerializeField][Tooltip("Use {0} for opponent name")] string messageAIThrowing = "{0} is now throwing";
 
     [Header("Hookups")]
     [SerializeField] GameObject rollPanel = null;
@@ -21,6 +24,8 @@ public class ScoreUI : MonoBehaviour
     [SerializeField] Transform diceEntryPanel = null;
     [SerializeField] DiceEntryUI diceEntryPrefab = null;
     [SerializeField] MatchPanelUI matchCompletePanel = null;
+    [SerializeField] TMP_Text aiThrowOverlay = null;
+    [SerializeField] TMP_Text initializationOverlay = null;
 
     // State
 
@@ -53,6 +58,9 @@ public class ScoreUI : MonoBehaviour
     {
         rollPanel.SetActive(false);
         matchCompletePanel.gameObject.SetActive(false);
+        aiThrowOverlay.gameObject.SetActive(false);
+
+        initializationOverlay.gameObject.SetActive(true);
     }
 
     // Public Methods
@@ -72,6 +80,7 @@ public class ScoreUI : MonoBehaviour
     private void HandleRollComplete(bool isPlayer)
     {
         rollPanel.gameObject.SetActive(true);
+        aiThrowOverlay.gameObject.SetActive(false);
 
         ScoreType scoreType = scoreKeep.GetScoreType();
         int score = scoreKeep.GetScore(isPlayer);
@@ -84,7 +93,8 @@ public class ScoreUI : MonoBehaviour
     {
         if (scoreKeep == null) { return; }
 
-        // Safety against roll panel showing on match end -- suppress for game complete
+        // Safety against roll panel / AI overlay showing on match end -- suppress for game complete
+        aiThrowOverlay.gameObject.SetActive(false);
         rollPanel.gameObject.SetActive(false);
 
         // Then set up the main match panel
@@ -99,9 +109,15 @@ public class ScoreUI : MonoBehaviour
             Destroy(child.gameObject);
         }
         rollPanel.gameObject.SetActive(false);
+
         if (scoreKeep.ShouldAIThrow())
         {
-
+            aiThrowOverlay.gameObject.SetActive(true);
+            aiThrowOverlay.text = String.Format(messageAIThrowing, scoreKeep.GetOpponentName());
+        }
+        else
+        {
+            aiThrowOverlay.gameObject.SetActive(false);
         }
     }
 
@@ -109,10 +125,11 @@ public class ScoreUI : MonoBehaviour
     {
         if (scoreKeep == null) { return; }
 
-        playerScorePanel.Setup(scoreKeep.GetPlayerName(), "-");
-        opponentScorePanel.Setup(scoreKeep.GetOpponentName(), "-");
+        UpdateScores(true, scoreKeep.GetScore(true));
+        UpdateScores(false, scoreKeep.GetScore(false));
 
         matchCompletePanel.gameObject.SetActive(false);
+        initializationOverlay.gameObject.SetActive(false);
     }
 
     private void UpdateScores(bool isPlayer, int score)
