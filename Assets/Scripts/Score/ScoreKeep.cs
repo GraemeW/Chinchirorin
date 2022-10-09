@@ -82,6 +82,7 @@ public class ScoreKeep : MonoBehaviour
     {
         return throwCountTracker >= throwCount && throwCountTracker < throwCount * 2;
     }
+
     public MatchData GetMatchData()
     {
         int betWinnings = isMatchComplete ? GetWinnings() : bet;

@@ -27,8 +27,6 @@ public class ScoreUI : MonoBehaviour
     [SerializeField] TMP_Text aiThrowOverlay = null;
     [SerializeField] TMP_Text initializationOverlay = null;
 
-    // State
-
     // Cached References
     ScoreKeep scoreKeep = null;
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -21,30 +22,33 @@ public class MatchPanelUI : MonoBehaviour
     [SerializeField] GameObject specialScorePanel = null;
     [SerializeField] GameObject standardScorePanel = null;
 
-    public void Setup(MatchData matchResolutionData, ScoreType scoreType)
+    public void Setup(MatchData matchData, ScoreType scoreType)
     {
-        switch (matchResolutionData.matchResolutionType)
+        if (Enum.TryParse(matchData.matchResolutionType, out MatchResolutionType matchResolutionType))
         {
-            case MatchResolutionType.PlayerWin:
-                winnerField.text = matchResolutionData.playerName;
-                winningsDispositionField.text = defaultWonTitle;
-                break;
-            case MatchResolutionType.PlayerLoss:
-                winnerField.text = matchResolutionData.opponentName;
-                winningsDispositionField.text = defaultLostTitle;
-                break;
-            case MatchResolutionType.Draw:
-                winnerField.text = defaultDrawName;
-                break;
-            case MatchResolutionType.InProgress:
-                break;
+            switch (matchResolutionType)
+            {
+                case MatchResolutionType.PlayerWin:
+                    winnerField.text = matchData.playerName;
+                    winningsDispositionField.text = defaultWonTitle;
+                    break;
+                case MatchResolutionType.PlayerLoss:
+                    winnerField.text = matchData.opponentName;
+                    winningsDispositionField.text = defaultLostTitle;
+                    break;
+                case MatchResolutionType.Draw:
+                    winnerField.text = defaultDrawName;
+                    break;
+                case MatchResolutionType.InProgress:
+                    break;
+            }
         }
 
-        winningsField.text = $"${Mathf.Abs(matchResolutionData.betWinnings)}";
-        playerNameField.text = matchResolutionData.playerName;
-        playerScoreField.text = matchResolutionData.playerScore.ToString();
-        opponentNameField.text = matchResolutionData.opponentName;
-        opponentScoreField.text = matchResolutionData.opponentScore.ToString();
+        winningsField.text = $"${Mathf.Abs(matchData.betWinnings)}";
+        playerNameField.text = matchData.playerName;
+        playerScoreField.text = matchData.playerScore.ToString();
+        opponentNameField.text = matchData.opponentName;
+        opponentScoreField.text = matchData.opponentScore.ToString();
 
         switch (scoreType)
         {
