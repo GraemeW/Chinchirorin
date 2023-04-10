@@ -8,7 +8,7 @@ This Unity project is a 'real physics'-based implementation of said dice game.  
 
 ## Running Chinchirorin Locally
 
-In order to run a local web server to test the OpenGL-compiled version of the project, one can use [python](), specifically calling the [http.server](https://docs.python.org/3/library/http.server.html) function. 
+In order to run a local web server to test the OpenGL-compiled version of the project, one can use [python](https://www.python.org/), specifically calling the [http.server](https://docs.python.org/3/library/http.server.html) function. 
 
 For example:
 * Navigate to the build directory:
