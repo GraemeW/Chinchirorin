@@ -4,7 +4,7 @@ Chinchirorin is a dice game also knowns as [Cee-Lo](https://en.wikipedia.org/wik
 
 ![](/DocResources/Chinchirorin.png)
 
-This Unity project is a 'real physics'-based implementation of said dice game.  Notably, the project is built for WebGL and posts game/match results to javascript, allowing for integration into other javascript platforms.  The default implementation handshakes with a DiscordBot hosted on the same server.
+This Unity project is a 'real physics'-based implementation of sed dice game.  Notably, the project is built for WebGL and posts game/match results to javascript, allowing for integration into other javascript platforms.  The default implementation handshakes with a DiscordBot hosted on the same server.
 
 ## Running Chinchirorin Locally
 
