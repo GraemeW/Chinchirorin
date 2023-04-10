@@ -8,7 +8,7 @@ This Unity project is a 'real physics'-based implementation of said dice game.  
 
 ## Running Chinchirorin Locally
 
-In order to run a local web server to test the OpenGL-compiled version of the project, one can use [python](https://www.python.org/), specifically calling the [http.server](https://docs.python.org/3/library/http.server.html) function. 
+In order to run a local web server to test the WebGL-compiled version of the project, one can use [python](https://www.python.org/), specifically calling the [http.server](https://docs.python.org/3/library/http.server.html) function. 
 
 For example:
 * Navigate to the build directory:
@@ -97,4 +97,6 @@ The “Play Again” button after completing a full match is included for debug.
 
 ### Unity Execution
 
-In order to test game functionality in Unity, the 'Debug Generate Test Initiator' bool in the [DiscordHandshaker](/Assets/Scripts/Utility/DiscordHandshaker.cs) Game Object should be set to:  ENABLE
+In order to test game functionality in Unity, the 'Debug Generate Test Initiator' bool in the [DiscordHandshaker](/Assets/Scripts/Utility/DiscordHandshaker.cs) Game Object should be set to:  ENABLE.
+
+For WebGL-compiled versions of the project, this property should be set to FALSE.
