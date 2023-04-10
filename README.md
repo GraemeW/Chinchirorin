@@ -97,4 +97,4 @@ The “Play Again” button after completing a full match is included for debug.
 
 ### Unity Execution
 
-In order to test game functionality in Unity, the 'Debug Generate Test Initiator' bool should be set to:  ENABLE
+In order to test game functionality in Unity, the 'Debug Generate Test Initiator' bool in the [DiscordHandshaker](/Assets/Scripts/Utility/DiscordHandshaker.cs) Game Object should be set to:  ENABLE
